@@ -1,0 +1,5 @@
+{
+  "name": "School Newsletter Generator",
+  "description": "An AI-powered assistant to generate responsive HTML newsletters for schools. It takes raw content and user preferences to produce a complete, ready-to-send newsletter.",
+  "requestFramePermissions": []
+}
