@@ -1,4 +1,3 @@
-
 export interface ContentBlock {
   id: number;
   title: string;
@@ -34,14 +33,22 @@ export interface FormData {
 
   imagePrompt: string;
   imagePosition: string;
-  
-  socials: {
-    facebook: string;
-    instagram: string;
-    linkedin: string;
-  };
+  generatedImageDataUri?: string;
 }
 
 export interface NewsletterOutput {
   html: string;
 }
+
+export type ExtractedStyles = Partial<Pick<
+  FormData,
+  | 'bodyTextColor'
+  | 'h2Color'
+  | 'h3Color'
+  | 'linkColor'
+  | 'buttonBackgroundColor'
+  | 'buttonTextColor'
+  | 'bodyFontFamily'
+  | 'h2FontFamily'
+  | 'h3FontFamily'
+>>;

@@ -1,6 +1,5 @@
-
 import React, { useReducer, Reducer } from 'react';
-import type { FormData, NewsletterOutput, ContentBlock } from './types';
+import type { FormData, NewsletterOutput, ContentBlock, ExtractedStyles } from './types';
 import { NewsletterForm } from './components/NewsletterForm';
 import { OutputDisplay } from './components/OutputDisplay';
 import { Loader } from './components/Loader';
@@ -10,13 +9,15 @@ import { ErrorDisplay } from './components/ErrorDisplay';
 type FormState = FormData;
 
 type Action =
-  | { type: 'UPDATE_FIELD'; payload: { field: keyof Omit<FormState, 'rawContent' | 'socials'>; value: string } }
-  | { type: 'UPDATE_SOCIAL_FIELD'; payload: { field: keyof FormState['socials']; value: string } }
+  | { type: 'UPDATE_FIELD'; payload: { field: keyof Omit<FormState, 'rawContent'>; value: string } }
   | { type: 'ADD_CONTENT_BLOCK' }
   | { type: 'REMOVE_CONTENT_BLOCK'; payload: { id: number } }
   | { type: 'UPDATE_CONTENT_BLOCK'; payload: { id: number; field: 'title' | 'content'; value: string } }
   | { type: 'LOAD_STATE'; payload: Omit<FormState, 'rawContent'> }
   | { type: 'SET_LOADING'; payload: boolean }
+  | { type: 'SET_IMAGE_PREVIEW_LOADING', payload: boolean }
+  | { type: 'SET_STYLE_IMPORTING', payload: boolean }
+  | { type: 'APPLY_IMPORTED_STYLES', payload: ExtractedStyles }
   | { type: 'SET_ERROR'; payload: string | null }
   | { type: 'SET_OUTPUT'; payload: NewsletterOutput | null };
 
@@ -24,6 +25,8 @@ type Action =
 interface AppState {
   formData: FormState;
   isLoading: boolean;
+  isPreviewLoading: boolean;
+  isStyleImporting: boolean;
   error: string | null;
   output: NewsletterOutput | null;
 }
@@ -39,12 +42,12 @@ const initialState: AppState = {
       {
         id: 1,
         title: 'Annual School Fair is Almost Here!',
-        content: `Our annual school fair is happening next Friday, **October 25th**, from *3 PM to 6 PM*. It's a day of fun, games, and community spirit!\n\n### We Need Your Help!\nWe are looking for parent volunteers for:\n- The bake sale\n- Game booths\n- Setup and cleanup`
+        content: `<p>Our annual school fair is happening next Friday, <strong>October 25th</strong>, from <em>3 PM to 6 PM</em>. It's a day of fun, games, and community spirit!</p><h3>We Need Your Help!</h3><p>We are looking for parent volunteers for:</p><ul><li>The bake sale</li><li>Game booths</li><li>Setup and cleanup</li></ul>`
       },
       {
         id: 2,
         title: 'Show Your Spirit',
-        content: 'Students are encouraged to wear their house colors to show school spirit! All proceeds will go towards new library books.'
+        content: '<p>Students are encouraged to wear their house colors to show school spirit! All proceeds will go towards new library books.</p>'
       }
     ],
     ctaText: 'Volunteer Now',
@@ -70,14 +73,11 @@ const initialState: AppState = {
 
     imagePrompt: '',
     imagePosition: 'Middle of content',
-
-    socials: {
-      facebook: '',
-      instagram: '',
-      linkedin: ''
-    }
+    generatedImageDataUri: '',
   },
   isLoading: false,
+  isPreviewLoading: false,
+  isStyleImporting: false,
   error: null,
   output: null
 };
@@ -86,8 +86,6 @@ const appReducer: Reducer<AppState, Action> = (state, action): AppState => {
   switch (action.type) {
     case 'UPDATE_FIELD':
       return { ...state, formData: { ...state.formData, [action.payload.field]: action.payload.value } };
-    case 'UPDATE_SOCIAL_FIELD':
-      return { ...state, formData: { ...state.formData, socials: { ...state.formData.socials, [action.payload.field]: action.payload.value } } };
     case 'ADD_CONTENT_BLOCK':
       const newBlock: ContentBlock = { id: Date.now(), title: '', content: '' };
       return { ...state, formData: { ...state.formData, rawContent: [...state.formData.rawContent, newBlock] } };
@@ -107,6 +105,12 @@ const appReducer: Reducer<AppState, Action> = (state, action): AppState => {
        return { ...state, formData: { ...state.formData, ...action.payload } };
     case 'SET_LOADING':
       return { ...state, isLoading: action.payload };
+    case 'SET_IMAGE_PREVIEW_LOADING':
+      return { ...state, isPreviewLoading: action.payload };
+    case 'SET_STYLE_IMPORTING':
+      return { ...state, isStyleImporting: action.payload };
+    case 'APPLY_IMPORTED_STYLES':
+      return { ...state, formData: { ...state.formData, ...action.payload } };
     case 'SET_ERROR':
       return { ...state, error: action.payload };
     case 'SET_OUTPUT':
@@ -119,7 +123,7 @@ const appReducer: Reducer<AppState, Action> = (state, action): AppState => {
 
 const App: React.FC = () => {
   const [state, dispatch] = useReducer(appReducer, initialState);
-  const { formData, isLoading, error, output } = state;
+  const { formData, isLoading, isPreviewLoading, isStyleImporting, error, output } = state;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -156,7 +160,8 @@ const App: React.FC = () => {
               formData={formData}
               dispatch={dispatch}
               handleSubmit={handleSubmit}
-              isLoading={isLoading}
+              isLoading={isLoading || isStyleImporting}
+              isPreviewLoading={isPreviewLoading}
             />
           </div>
 

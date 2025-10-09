@@ -1,4 +1,3 @@
-
 import React from 'react';
 
 // Generic Form Input
@@ -28,10 +27,13 @@ export const FormInput: React.FC<{ label: string; name: string; value: string; o
 };
 
 // Generic Form Textarea
-export const FormTextarea: React.FC<{ label: string; name: string; value: string; onChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void; placeholder?: string; rows?: number; required?: boolean; helpText?: React.ReactNode }> = ({ label, name, value, onChange, placeholder, rows = 4, required = false, helpText }) => (
+export const FormTextarea: React.FC<{ label: string; name: string; value: string; onChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void; placeholder?: string; rows?: number; required?: boolean; helpText?: React.ReactNode; charCount?: React.ReactNode }> = ({ label, name, value, onChange, placeholder, rows = 4, required = false, helpText, charCount }) => (
   <div>
-    <label htmlFor={name} className="block text-sm font-medium text-gray-700 mb-1">{label}{required && <span className="text-red-500">*</span>}</label>
-     {helpText && <p className="text-xs text-gray-500 mt-1 mb-2">{helpText}</p>}
+    <div className="flex justify-between items-center mb-1">
+      <label htmlFor={name} className="block text-sm font-medium text-gray-700">{label}{required && <span className="text-red-500">*</span>}</label>
+      {charCount}
+    </div>
+    {helpText && <p className="text-xs text-gray-500 mt-1 mb-2">{helpText}</p>}
     <textarea
       id={name}
       name={name}
@@ -63,9 +65,12 @@ export const FormSelect: React.FC<{ label: string; name: string; value: string; 
 );
 
 // Generic Form Color Picker
-export const FormColorPicker: React.FC<{ label: string; name: string; value: string; onChange: (e: React.ChangeEvent<HTMLInputElement>) => void; }> = ({ label, name, value, onChange }) => (
+export const FormColorPicker: React.FC<{ label: string; name: string; value: string; onChange: (e: React.ChangeEvent<HTMLInputElement>) => void; warning?: React.ReactNode; }> = ({ label, name, value, onChange, warning }) => (
   <div>
-    <label htmlFor={name} className="block text-sm font-medium text-gray-700 mb-1">{label}</label>
+    <div className="flex justify-between items-center mb-1">
+        <label htmlFor={name} className="block text-sm font-medium text-gray-700">{label}</label>
+        {warning}
+    </div>
     <div className="flex items-center gap-2">
       <input
         type="color"

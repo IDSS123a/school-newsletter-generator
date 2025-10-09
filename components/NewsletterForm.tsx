@@ -1,4 +1,3 @@
-
 import React from 'react';
 import type { FormData } from '../types';
 
@@ -7,7 +6,6 @@ import { StyleCustomization } from './form/StyleCustomization';
 import { ContentBlocks } from './form/ContentBlocks';
 import { ImageGeneration } from './form/ImageGeneration';
 import { CallToAction } from './form/CallToAction';
-import { SocialLinks } from './form/SocialLinks';
 import { FormActions } from './form/FormActions';
 
 interface FormProps {
@@ -15,9 +13,10 @@ interface FormProps {
   dispatch: React.Dispatch<any>;
   handleSubmit: (e: React.FormEvent) => void;
   isLoading: boolean;
+  isPreviewLoading: boolean;
 }
 
-export const NewsletterForm: React.FC<FormProps> = ({ formData, dispatch, handleSubmit, isLoading }) => {
+export const NewsletterForm: React.FC<FormProps> = ({ formData, dispatch, handleSubmit, isLoading, isPreviewLoading }) => {
   const handleSavePreferences = () => {
     try {
       const { rawContent, ...prefsToSave } = formData;
@@ -52,12 +51,12 @@ export const NewsletterForm: React.FC<FormProps> = ({ formData, dispatch, handle
       <ContentParameters formData={formData} dispatch={dispatch} />
       <StyleCustomization formData={formData} dispatch={dispatch} />
       <ContentBlocks formData={formData} dispatch={dispatch} />
-      <ImageGeneration formData={formData} dispatch={dispatch} />
+      <ImageGeneration formData={formData} dispatch={dispatch} isPreviewLoading={isPreviewLoading} />
       <CallToAction formData={formData} dispatch={dispatch} />
-      <SocialLinks formData={formData} dispatch={dispatch} />
       
       <FormActions 
         isLoading={isLoading} 
+        isPreviewLoading={isPreviewLoading}
         onSave={handleSavePreferences} 
         onLoad={handleLoadPreferences} 
       />
