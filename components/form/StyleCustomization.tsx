@@ -8,7 +8,7 @@ import { StyleImporter } from './StyleImporter';
 function hexToRgb(hex: string): { r: number; g: number; b: number } | null {
   // Expand shorthand form (e.g. "FFF") to full form (e.g. "FFFFFF")
   const shorthandRegex = /^#?([a-f\d])([a-f\d])([a-f\d])$/i;
-  hex = hex.replace(shorthandRegex, (m, r, g, b) => {
+  hex = hex.replace(shorthandRegex, (_m, r, g, b) => {
     return r + r + g + g + b + b;
   });
 

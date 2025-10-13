@@ -2,8 +2,14 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import type { ExtractedStyles } from "../types";
 
-// Always use new GoogleGenAI({apiKey: process.env.API_KEY});
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+// Get API key from environment variables (Vite requires VITE_ prefix for browser access)
+const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
+
+if (!apiKey) {
+  console.error("VITE_GEMINI_API_KEY is not set in environment variables. Please check your .env file.");
+}
+
+const ai = new GoogleGenAI({ apiKey: apiKey || "" });
 
 const responseSchema = {
     type: Type.OBJECT,
@@ -57,6 +63,10 @@ export const extractStylesFromUrl = async (url: string): Promise<ExtractedStyles
                 responseSchema: responseSchema,
             },
         });
+        
+        if (!response.text) {
+            throw new Error("AI did not return a valid response.");
+        }
         
         const jsonText = response.text.trim();
         const parsedStyles: ExtractedStyles = JSON.parse(jsonText);

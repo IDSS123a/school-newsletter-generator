@@ -1,6 +1,6 @@
-import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
+import './index.css';
 
 // Diagnostic check for document mode
 console.log('--- Initial App Load ---');
