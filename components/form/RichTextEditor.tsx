@@ -99,7 +99,7 @@ const RichTextEditorComponent: React.FC<RichTextEditorProps> = ({
             }
             
             // Attach event listener
-            quillInstance.current.on('text-change', (delta: any, oldDelta: any, source: string) => {
+            quillInstance.current.on('text-change', (_delta: any, _oldDelta: any, source: string) => {
                 if (source === 'user' && onChangeRef.current) {
                     // Accessing .current gets the latest onChange function, avoiding stale closures.
                     const content = quillInstance.current.root.innerHTML;

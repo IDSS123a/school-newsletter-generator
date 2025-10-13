@@ -1,14 +1,20 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import type { FormData, NewsletterOutput } from "../types";
 
-// Always use new GoogleGenAI({apiKey: process.env.API_KEY});
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+// Get API key from environment variables (Vite requires VITE_ prefix for browser access)
+const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
+
+if (!apiKey) {
+  console.error("VITE_GEMINI_API_KEY is not set in environment variables. Please check your .env file.");
+}
+
+const ai = new GoogleGenAI({ apiKey: apiKey || "" });
 
 // --- Accessibility & Dynamic Asset Utils ---
 function hexToRgb(hex: string): { r: number; g: number; b: number } | null {
   // Expand shorthand form (e.g. "FFF") to full form (e.g. "FFFFFF")
   const shorthandRegex = /^#?([a-f\d])([a-f\d])([a-f\d])$/i;
-  hex = hex.replace(shorthandRegex, (m, r, g, b) => {
+  hex = hex.replace(shorthandRegex, (_m, r, g, b) => {
     return r + r + g + g + b + b;
   });
 
@@ -91,8 +97,11 @@ export const generateImage = async (prompt: string): Promise<string> => {
         },
     });
     if (response.generatedImages && response.generatedImages.length > 0) {
-        const base64ImageBytes: string = response.generatedImages[0].image.imageBytes;
-        return `data:image/jpeg;base64,${base64ImageBytes}`;
+        const imageData = response.generatedImages[0]?.image?.imageBytes;
+        if (!imageData) {
+            throw new Error('Image data is missing from the API response.');
+        }
+        return `data:image/jpeg;base64,${imageData}`;
     } else {
         throw new Error('No image was returned from the API. Please try a different prompt.');
     }
@@ -199,6 +208,10 @@ export const generateNewsletterPackage = async (formData: FormData): Promise<New
         }),
         getNewsletterTemplate()
     ]);
+    
+    if (!allContentResponse.text) {
+        throw new Error("AI did not return a valid response.");
+    }
     
     const allContent = JSON.parse(allContentResponse.text.trim());
     const { description, keywords, contentHtml } = allContent;
